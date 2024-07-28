@@ -42,7 +42,7 @@ Settings.embed_model = embed_model
 
 # Setup LLM
 
-llm = Gemini(api_key=st.secrets["GEMINI_API_KEY"], max_tokens=2000)
+llm = Gemini(api_key=st.secrets["GEMINI_API_KEY"], max_tokens=8000)
 Settings.llm = llm
 
 # Connect Llama-index and MongoDB Atlas
