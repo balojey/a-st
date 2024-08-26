@@ -24,9 +24,9 @@ else:
     print("ATLAS_URI Connection string found:", ATLAS_URI)
 
 # Define DB variables
-DB_NAME = 'aelf'
-COLLECTION_NAME = 'docs'
-INDEX_NAME = 'idx_embedding'
+DB_NAME = st.secrets["DB_NAME"]
+COLLECTION_NAME = st.secrets["COLLECTION_NAME"]
+INDEX_NAME = st.secrets["INDEX_NAME"]
 
 # LlamaIndex will download embeddings models as needed
 # Set llamaindex cache dir to ../cache dir here (Default is system tmp)
@@ -37,7 +37,7 @@ mongodb_client = pymongo.MongoClient(ATLAS_URI)
 
 # Setup Embedding Model
 
-embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+embed_model = HuggingFaceEmbedding(model_name=st.secrets["EMBED_MODEL"])
 Settings.embed_model = embed_model
 
 # Setup LLM
@@ -48,7 +48,7 @@ Settings.llm = llm
 # Connect Llama-index and MongoDB Atlas
 vector_store = MongoDBAtlasVectorSearch(mongodb_client = mongodb_client,
                                  db_name = DB_NAME, collection_name = COLLECTION_NAME,
-                                 index_name  = 'idx_embedding',
+                                 index_name  = INDEX_NAME,
                                  )
 storage_context = StorageContext.from_defaults(vector_store=vector_store)
 index = VectorStoreIndex.from_vector_store(
@@ -60,19 +60,7 @@ memory = ChatMemoryBuffer.from_defaults()
 chat_engine = index.as_chat_engine(
     chat_mode="context",
     memory=memory,
-    system_prompt=(
-        """You're a helpful assistant who help developers understand the aelf blockchain documentation better, \
-            a smart contract debugger who checks smart contracts written for the aelf blockchain for errors, \
-            and a smart contract generator for the aelf blockchain.
-            Your name is AelfGPT.
-            As a Smart contract generator and a debugger, you must understand that smart contracts are written \
-            for the aelf blockchain using the C# programming language.
-            Although there are SDKs in various languages that can be used to access on-chain data.
-            Make sure all the smart contracts you write are in C#!
-            You must try as much as possible to get developers/users the answer they want without talking too much!
-            Be precise, succint and consise, always!
-            """
-    )
+    system_prompt=(st.secrets["SYSTEM_PROMPT"])
 )
 
 # Initialize chat history
